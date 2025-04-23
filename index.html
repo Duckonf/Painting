@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>test</title>
+  <title>3D AR Painting - Untitled</title>
 
   <!-- Load model-viewer -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
@@ -23,27 +23,39 @@
       width: 100%;
       max-width: 800px;
       height: 500px;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
     button {
       margin-top: 20px;
-      padding: 10px 20px;
+      padding: 10px 24px;
       font-size: 1rem;
+      background-color: #111;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #333;
     }
   </style>
 </head>
 
 <body>
 
-  <h1>View in AR</h1>
+  <h1>Untitled Painting in AR</h1>
 
+  <!-- 3D model with AR -->
   <model-viewer
     src="Untitled.glb"
     ios-src="Untitled.usdz"
-    alt="test"
+    alt="3D Untitled Painting"
     ar
     ar-modes="scene-viewer webxr quick-look"
-    auto-rotate
     camera-controls
+    auto-rotate
     shadow-intensity="1">
   </model-viewer>
 
