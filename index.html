@@ -1,65 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D AR Painting - Untitled</title>
+  <head>
+    <meta charset="utf-8" />
+    <title>3D Gallery - Untitled Painting</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: #ffffff;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/loaders/GLTFLoader.js"></script>
 
-  <!-- Load model-viewer -->
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
+    <script>
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xffffff);
 
-  <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: sans-serif;
-      background-color: #f4f4f4;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    model-viewer {
-      width: 100%;
-      max-width: 800px;
-      height: 500px;
-      border-radius: 16px;
-      background: white;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    }
-    button {
-      margin-top: 20px;
-      padding: 10px 24px;
-      font-size: 1rem;
-      background-color: #111;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #333;
-    }
-  </style>
-</head>
+      const camera = new THREE.PerspectiveCamera(
+        50,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        100
+      );
+      camera.position.set(0, 1.8, 4);
 
-<body>
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      document.body.appendChild(renderer.domElement);
 
-  <h1>Untitled Painting in AR</h1>
+      // Room (floor + walls)
+      const roomMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), roomMaterial);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
 
-  <!-- 3D model with AR -->
-  <model-viewer
-    src="Untitled.glb"
-    ios-src="Untitled.usdz"
-    alt="3D Untitled Painting"
-    ar
-    ar-modes="scene-viewer webxr quick-look"
-    camera-controls
-    auto-rotate
-    shadow-intensity="1">
-  </model-viewer>
+      const backWall = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), roomMaterial);
+      backWall.position.z = -5;
+      backWall.position.y = 2.5;
+      backWall.receiveShadow = true;
+      scene.add(backWall);
 
-  <button onclick="document.querySelector('model-viewer').activateAR()">View in AR</button>
+      const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), roomMaterial);
+      ceiling.rotation.x = Math.PI / 2;
+      ceiling.position.y = 5;
+      scene.add(ceiling);
 
-</body>
+      const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), roomMaterial);
+      leftWall.rotation.y = Math.PI / 2;
+      leftWall.position.x = -5;
+      leftWall.position.y = 2.5;
+      scene.add(leftWall);
+
+      const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), roomMaterial);
+      rightWall.rotation.y = -Math.PI / 2;
+      rightWall.position.x = 5;
+      rightWall.position.y = 2.5;
+      scene.add(rightWall);
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(ambientLight);
+
+      const spotLight = new THREE.SpotLight(0xffffff, 1.5);
+      spotLight.position.set(0, 4.5, -3);
+      spotLight.angle = Math.PI / 7;
+      spotLight.penumbra = 0.5;
+      spotLight.castShadow = true;
+      scene.add(spotLight);
+
+      // Load your painting
+      const loader = new THREE.GLTFLoader();
+      loader.load('Untitled.glb', function (gltf) {
+        const painting = gltf.scene;
+        painting.position.set(0, 2.5, -4.99); // almost touching back wall
+        painting.scale.set(1, 1, 1); // scale if needed
+        painting.castShadow = true;
+        scene.add(painting);
+      });
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.minDistance = 2;
+      controls.maxDistance = 10;
+      controls.target.set(0, 2.5, 0);
+      controls.update();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      animate();
+    </script>
+  </body>
 </html>
